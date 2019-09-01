@@ -53,14 +53,6 @@
 	/delete-property/ qcom,smmu-s1-bypass;
 };
 
-&mdss_dsi0_pll {
-	compatible = "qcom,mdss_dsi_pll_7nm_v2";
-};
-
-&mdss_dsi1_pll {
-	compatible = "qcom,mdss_dsi_pll_7nm_v2";
-};
-
 &spss_utils {
 	qcom,spss-dev-firmware-name  = "spss2d";	/* 8 chars max */
 	qcom,spss-test-firmware-name = "spss2t";	/* 8 chars max */
@@ -482,6 +474,7 @@
 			2649600 1179
 			2745600 1288
 			2841600 1427
+			2956800 1670
 		>;
 		idle-cost-data = <
 			110 90 70
@@ -561,6 +554,7 @@
 			2649600 147
 			2745600 160
 			2841600 180
+			2956800 197
 		>;
 		idle-cost-data = <
 			3 2 1
@@ -576,7 +570,7 @@
 	qcom,chipid = <0x06040001>;
 
 	/* Power level to start throttling */
-	qcom,throttle-pwrlevel = <3>;
+	qcom,throttle-pwrlevel = <0>;
 
 	/* Updated Bus Scale Settings */
 	qcom,msm-bus,num-cases = <12>;
@@ -599,9 +593,9 @@
 		<26 512 0 5407000>,    // 8 bus=1353
 		<26 512 0 6215000>,    // 9 bus=1555
 		<26 512 0 7211000>,    // 10 bus=1804
-		<26 512 0 8363000>;    // 11 bus=2092
+		<26 512 0 8363000>;    // 11 bus=2094
 
-	qcom,initial-pwrlevel = <5>;
+	qcom,initial-pwrlevel = <7>;
 
 	operating-points-v2 = <&gpu_opp_table_v2>;
 
@@ -613,60 +607,84 @@
 
 		qcom,gpu-pwrlevel@0 {
 			reg = <0>;
-			qcom,gpu-freq = <700000000>;
+			qcom,gpu-freq = <800000000>;
+			qcom,bus-freq = <11>;
+			qcom,bus-min = <11>;
+			qcom,bus-max = <11>;
+		};
+
+		qcom,gpu-pwrlevel@1 {
+			reg = <1>;
+			qcom,gpu-freq = <735000000>;
 			qcom,bus-freq = <11>;
 			qcom,bus-min = <11>;
 			qcom,bus-max = <11>;
 		};
 		
-		qcom,gpu-pwrlevel@1 {
-			reg = <1>;
+		qcom,gpu-pwrlevel@2 {
+			reg = <2>;
+			qcom,gpu-freq = <675000000>;
+			qcom,bus-freq = <11>;
+			qcom,bus-min = <11>;
+			qcom,bus-max = <11>;
+		};
+		
+		qcom,gpu-pwrlevel@3 {
+			reg = <3>;
 			qcom,gpu-freq = <585000000>;
-			qcom,bus-freq = <10>;
-			qcom,bus-min = <9>;
+			qcom,bus-freq = <11>;
+			qcom,bus-min = <11>;
 			qcom,bus-max = <11>;
 		};
 
-		qcom,gpu-pwrlevel@2 {
-			reg = <2>;
+		qcom,gpu-pwrlevel@4 {
+			reg = <4>;
 			qcom,gpu-freq = <499200000>;
 			qcom,bus-freq = <9>;
 			qcom,bus-min = <8>;
 			qcom,bus-max = <11>;
 		};
 
-		qcom,gpu-pwrlevel@3 {
-			reg = <3>;
+		qcom,gpu-pwrlevel@5 {
+			reg = <5>;
 			qcom,gpu-freq = <427000000>;
 			qcom,bus-freq = <6>;
 			qcom,bus-min = <5>;
 			qcom,bus-max = <7>;
 		};
 
-		qcom,gpu-pwrlevel@4 {
-			reg = <4>;
+		qcom,gpu-pwrlevel@6 {
+			reg = <6>;
 			qcom,gpu-freq = <345000000>;
 			qcom,bus-freq = <3>;
 			qcom,bus-min = <3>;
 			qcom,bus-max = <5>;
 		};
 
-		qcom,gpu-pwrlevel@5 {
-			reg = <5>;
+		qcom,gpu-pwrlevel@7 {
+			reg = <7>;
 			qcom,gpu-freq = <257000000>;
 			qcom,bus-freq = <3>;
 			qcom,bus-min = <2>;
 			qcom,bus-max = <4>;
 		};
+		
+		qcom,gpu-pwrlevel@8 {
+			reg = <8>;
+			qcom,gpu-freq = <180000000>;
+			qcom,bus-freq = <3>;
+			qcom,bus-min = <2>;
+			qcom,bus-max = <4>;
+		};
 
-		qcom,gpu-pwrlevel@6 {
-			reg = <6>;
+		qcom,gpu-pwrlevel@9 {
+			reg = <9>;
 			qcom,gpu-freq = <0>;
 			qcom,bus-freq = <0>;
 			qcom,bus-min = <0>;
 			qcom,bus-max = <0>;
 		};
-		/delete-node/ qcom,gpu-pwrlevel@7;
+		/delete-node/ qcom,gpu-pwrlevel@10;
 	};
 
 	qcom,l3-pwrlevels {
@@ -702,9 +720,9 @@
 
 	qcom,gpu-acd-table {
 		/* Corresponds to levels in the GPU perf table */
-		qcom,acd-enable-by-level = <0x3e>;
+		qcom,acd-enable-by-level = <0x7e>;
 		qcom,acd-stride = <0x2>;
-		qcom,acd-num-levels = <0x5>;
+		qcom,acd-num-levels = <0x6>;
 
 		/* ACDCR, ACDTD */
 		qcom,acd-data = <0xa02d5ffd 0x00007611 /* LowSVS */
@@ -895,7 +913,7 @@
 		BW_OPP_ENTRY(1353, 4); /* 5161 MB/s */
 		BW_OPP_ENTRY(1555, 4); /* 5931 MB/s */
 		BW_OPP_ENTRY(1804, 4); /* 6881 MB/s */
-		BW_OPP_ENTRY(2092, 4); /* 7980 MB/s */
+		BW_OPP_ENTRY(2094, 4); /* 7980 MB/s */
 	};
 
 	suspendable_ddr_bw_opp_table: suspendable-ddr-bw-opp-table {
@@ -911,14 +929,14 @@
 		BW_OPP_ENTRY(1353, 4); /* 5161 MB/s */
 		BW_OPP_ENTRY(1555, 4); /* 5931 MB/s */
 		BW_OPP_ENTRY(1804, 4); /* 6881 MB/s */
-		BW_OPP_ENTRY(2092, 4); /* 7980 MB/s */
+		BW_OPP_ENTRY(2094, 4); /* 7980 MB/s */
 	};
 };
 &cpu4_computemon {
 	qcom,core-dev-table =
 		< 1920000 MHZ_TO_MBPS( 200, 4) >,
 		< 2793600 MHZ_TO_MBPS(1017, 4) >,
-		< 3000000 MHZ_TO_MBPS(2092, 4) >;
+		< 3000000 MHZ_TO_MBPS(2094, 4) >;
 };
 
 &cpu0_llcc_ddr_latmon {
@@ -940,7 +958,7 @@
 		< 1612800 MHZ_TO_MBPS(1353, 4) >,
 		< 1804800 MHZ_TO_MBPS(1555, 4) >,
 		< 2649600 MHZ_TO_MBPS(1804, 4) >,
-		< 3000000 MHZ_TO_MBPS(2092, 4) >;
+		< 3000000 MHZ_TO_MBPS(2094, 4) >;
 };
 
 &cpu0_cpu_l3_latmon {
