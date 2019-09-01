@@ -553,6 +553,12 @@ config QPNP_MISC
 	  and the driver provides an API to check if this interrupt
 	  is available on the current PMIC chip.
 
+config FORCE_FAST_CHARGE
+	bool "Force faster charge rate for USB"
+	default y
+	help
+	  This allows users to override default charge rate for USB
+
 config TI_DRV8846
 	tristate "TI step motor driver IC"
 	depends on PWM
