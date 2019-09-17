@@ -48,6 +48,11 @@ static long xiaomi_touch_dev_ioctl(struct file *file, unsigned int cmd,
 	struct xiaomi_touch_interface *touch_data = pdata->touch_data;
 	struct xiaomi_touch *dev = pdata->device;
 	int user_cmd = _IOC_NR(cmd);
+	
+	if(pdata->skip_update) {
+		pr_info("%s Skipping userspace control", __func__);
+		return 0;
+	}
 
 	if (!pdata || !touch_data || !dev) {
 		pr_err("%s invalid memory\n", __func__);
@@ -280,15 +285,88 @@ struct device_attribute *attr, const char *buf, size_t count)
 	return count;
 }
 
+static ssize_t skip_update_show(struct device *dev,
+struct device_attribute *attr, char *buf)
+{
+	struct xiaomi_touch_pdata *pdata = dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", pdata->skip_update);
+}
+
+static ssize_t skip_update_store(struct device *dev,
+struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct xiaomi_touch_pdata *pdata = dev_get_drvdata(dev);
+	unsigned int input;
+
+	if (sscanf(buf, "%d", &input) < 0)
+			return -EINVAL;
+	input = !!input;
+
+	pdata->skip_update = input;
+
+	pr_info("%s value:%d\n", __func__, input);
+
+	return count;
+}
+
+static ssize_t force_game_mode_show(struct device *dev,
+struct device_attribute *attr, char *buf)
+{
+	struct xiaomi_touch_pdata *pdata = dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%d\n", pdata->force_game_mode);
+}
+
+static ssize_t force_game_mode_store(struct device *dev,
+struct device_attribute *attr, const char *buf, size_t count)
+{
+	struct xiaomi_touch_pdata *pdata = dev_get_drvdata(dev);
+	struct xiaomi_touch_interface *touch_data = pdata->touch_data;
+	unsigned int input;
+
+	if (sscanf(buf, "%d", &input) < 0)
+			return -EINVAL;
+	input = !!input;
+
+	if(input) {
+		pdata->skip_update = true;
+		pdata->force_game_mode = true;
+		touch_data->setModeValue(0, 1);
+		touch_data->setModeValue(1, 1);
+		touch_data->setModeValue(3, 34);
+		touch_data->setModeValue(2, 99);
+		touch_data->setModeValue(7, 0);
+		pr_info("%s Force Game Mode: On\n", __func__);
+	} else {
+		pdata->skip_update = false;
+		pdata->force_game_mode = false;
+		touch_data->resetMode(0);
+		pr_info("%s Force Game Mode: Off\n", __func__);
+	}
+
+	pr_info("%s value:%d\n", __func__, input);
+
+	return count;
+}
+
 static DEVICE_ATTR(palm_sensor, (S_IRUGO | S_IWUSR | S_IWGRP),
 		   palm_sensor_show, palm_sensor_store);
 
 static DEVICE_ATTR(pocket_touch, (S_IRUGO | S_IWUSR | S_IWGRP),
 		   pocket_show, pocket_store);
+		   
+static DEVICE_ATTR(skip_update, (S_IRUGO | S_IWUSR | S_IWGRP),
+		   skip_update_show, skip_update_store);
+
+static DEVICE_ATTR(force_game_mode, (S_IRUGO | S_IWUSR | S_IWGRP),
+		   force_game_mode_show, force_game_mode_store);
 
 static struct attribute *touch_attr_group[] = {
 	&dev_attr_palm_sensor.attr,
 	&dev_attr_pocket_touch.attr,
+	&dev_attr_skip_update.attr,
+	&dev_attr_force_game_mode.attr,
 	NULL,
 };
 
